@@ -1,0 +1,8 @@
+schema: paperclip/v1
+agents:
+  ceo:
+    permissions:
+      canCreateAgents: true
+  cto:
+    permissions:
+      canCreateAgents: true

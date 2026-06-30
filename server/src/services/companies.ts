@@ -33,6 +33,7 @@ import { notFound, unprocessable } from "../errors.js";
 import { environmentService } from "./environments.js";
 import { heartbeatService } from "./heartbeat.js";
 import { logActivity } from "./activity-log.js";
+import type { StorageService } from "../storage/types.js";
 
 export interface CompanyActivityActor {
   actorType: "user" | "agent" | "system" | "plugin";
@@ -48,7 +49,7 @@ const SYSTEM_COMPANY_ACTOR: CompanyActivityActor = {
   runId: null,
 };
 
-export function companyService(db: Db) {
+export function companyService(db: Db, storage?: StorageService) {
   const ISSUE_PREFIX_FALLBACK = "CMP";
   const environmentsSvc = environmentService(db);
   const heartbeat = heartbeatService(db);
@@ -196,7 +197,11 @@ export function companyService(db: Db) {
     return database
       .select(companySelection)
       .from(companies)
-      .leftJoin(companyLogos, eq(companyLogos.companyId, companies.id));
+      // Two LEFT JOINs so a stale `company_logos` row pointing at a deleted
+      // asset (legacy data, or a half-applied PATCH) still surfaces as
+      // `logoAssetId: null` to the UI instead of 404'ing every render.
+      .leftJoin(companyLogos, eq(companyLogos.companyId, companies.id))
+      .leftJoin(assets, eq(assets.id, companyLogos.assetId));
   }
 
   /**
@@ -384,6 +389,18 @@ export function companyService(db: Db) {
 
         const archiveCascade = willArchive ? await applyArchiveCascadeInTx(tx, id) : null;
 
+        // Capture the previous logo's asset + objectKey BEFORE we touch
+        // company_logos / assets, so we can clean up the disk file after
+        // commit. Skipped when the user is uploading a fresh logo with no
+        // prior branding — no orphan to clean.
+        const previousLogo = existing.logoAssetId
+          ? await tx
+              .select({ id: assets.id, objectKey: assets.objectKey })
+              .from(assets)
+              .where(eq(assets.id, existing.logoAssetId))
+              .then((rows) => rows[0] ?? null)
+          : null;
+
         if (logoAssetId === null) {
           await tx.delete(companyLogos).where(eq(companyLogos.companyId, id));
         } else if (logoAssetId !== undefined) {
@@ -402,8 +419,17 @@ export function companyService(db: Db) {
             });
         }
 
-        if (logoAssetId !== undefined && existing.logoAssetId && existing.logoAssetId !== logoAssetId) {
-          await tx.delete(assets).where(eq(assets.id, existing.logoAssetId));
+        // Drop the previous logo asset row when:
+        //   1. logo is replaced (existing.logoAssetId !== new logoAssetId)
+        //   2. logo is removed (logoAssetId === null)
+        // Disk file cleanup runs after commit via the deferred handler below.
+        const shouldDropPreviousAsset =
+          logoAssetId !== undefined
+          && previousLogo
+          && previousLogo.id !== logoAssetId;
+
+        if (shouldDropPreviousAsset) {
+          await tx.delete(assets).where(eq(assets.id, previousLogo.id));
         }
 
         const [hydrated] = await hydrateCompanySpend([{
@@ -418,9 +444,22 @@ export function companyService(db: Db) {
           company: enrichCompany(hydrated),
           reactivated: shouldLogReactivation ? { agentsRestored } : null,
           archiveCascade,
+          previousLogo: shouldDropPreviousAsset ? previousLogo : null,
         };
       });
       if (!result) return null;
+
+      // Best-effort orphan cleanup: drop the previous logo's disk file
+      // AFTER the DB tx commits so a rollback can't leave an orphaned DB
+      // row pointing at a deleted file. Swallow errors — the file will be
+      // reaped by the next deploy's storage-gc, and a dangling temp file
+      // is preferable to a failed logo mutation.
+      if (storage && result.previousLogo) {
+        storage
+          .deleteObject(id, result.previousLogo.objectKey)
+          .catch(() => undefined);
+      }
+
       if (result.reactivated) {
         await logActivity(db, {
           companyId: id,

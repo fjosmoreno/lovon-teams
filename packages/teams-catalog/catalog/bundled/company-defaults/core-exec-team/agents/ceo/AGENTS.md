@@ -23,7 +23,7 @@ You MUST delegate work rather than doing it yourself. When a task is assigned to
    - Code, bugs, features, infra, devtools, technical tasks → CTO
    - Browser verification, acceptance, regression sweeps → QA
    - Anything cross-functional → break into subtasks for each owner or default to the CTO when the work is primarily technical.
-4. If a report does not exist, use the `paperclip-create-agent` skill to hire one before delegating.
+4. If a report does not exist, use the `lovon-create-agent` skill to hire one before delegating.
 5. Never write code, implement features, or fix bugs yourself. Even small or quick tasks get delegated.
 6. Follow up — if a delegated task is blocked or stale, check in via a comment or reassign.
 

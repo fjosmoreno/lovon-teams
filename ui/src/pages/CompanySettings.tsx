@@ -6,6 +6,7 @@ import {
 } from "@paperclipai/shared";
 import { useCompany } from "../context/CompanyContext";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
+import { useToastActions } from "../context/ToastContext";
 import { companiesApi } from "../api/companies";
 import { assetsApi } from "../api/assets";
 import { instanceSettingsApi } from "../api/instanceSettings";
@@ -29,6 +30,7 @@ export function CompanySettings() {
     setSelectedCompanyId
   } = useCompany();
   const { setBreadcrumbs } = useBreadcrumbs();
+  const { pushToast } = useToastActions();
   const queryClient = useQueryClient();
   const { data: experimentalSettings } = useQuery({
     queryKey: queryKeys.instance.experimentalSettings,
@@ -153,6 +155,39 @@ export function CompanySettings() {
         queryKey: queryKeys.companies.stats
       });
     }
+  });
+
+  // Lovon Teams — restore an archived company back to active.
+  // PATCH /api/companies/:id with status: "active". The server-side
+  // service update() flips the row AND wakes the previously-archived
+  // agents (status='paused', pauseReason='company_archived' → 'idle')
+  // so the user can resume work immediately.
+  const unarchiveMutation = useMutation({
+    mutationFn: (companyId: string) =>
+      companiesApi.update(companyId, { status: "active" }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.companies.all,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.companies.detail(selectedCompanyId!),
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.companies.stats,
+      });
+      pushToast({
+        title: "Company reactivated",
+        body: "Agents that were auto-paused on archive are now idle.",
+        tone: "success",
+      });
+    },
+    onError: (err) => {
+      pushToast({
+        title: "Failed to reactivate",
+        body: err instanceof Error ? err.message : "Unknown error",
+        tone: "error",
+      });
+    },
   });
 
   // Lovon Teams — permanent company delete (hard delete, no undo).
@@ -511,6 +546,21 @@ export function CompanySettings() {
                 ? "Already archived"
                 : "Archive company"}
             </Button>
+            {selectedCompany.status === "archived" && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={() => {
+                  if (!selectedCompanyId) return;
+                  unarchiveMutation.mutate(selectedCompanyId);
+                }}
+                disabled={unarchiveMutation.isPending}
+              >
+                {unarchiveMutation.isPending
+                  ? "Reactivating…"
+                  : "Reactivate company"}
+              </Button>
+            )}
             {archiveMutation.isError && (
               <span className="text-xs text-destructive">
                 {archiveMutation.error instanceof Error

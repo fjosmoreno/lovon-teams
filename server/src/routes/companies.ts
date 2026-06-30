@@ -34,7 +34,7 @@ import { COMPANY_IMPORT_ROUTE_PATH } from "./company-import-paths.js";
 
 export function companyRoutes(db: Db, storage?: StorageService) {
   const router = Router();
-  const svc = companyService(db);
+  const svc = companyService(db, storage);
   const agents = agentService(db);
   const portability = companyPortabilityService(db, storage);
   const access = accessService(db);
