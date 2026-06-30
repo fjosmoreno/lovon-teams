@@ -41,6 +41,12 @@ export function CompanySettings() {
   const [attachmentMaxMiB, setAttachmentMaxMiB] = useState(String(DEFAULT_COMPANY_ATTACHMENT_MAX_MIB));
   const [logoUrl, setLogoUrl] = useState("");
   const [logoUploadError, setLogoUploadError] = useState<string | null>(null);
+  // Issue prefix: 2-8 uppercase letters/digits (LOV-3 style task identifiers).
+  // Editable so a board can fix an awkward auto-generated prefix (e.g. LOVA
+  // produced by an old "first 3 chars + suffix loop" run) without having to
+  // re-create the company.
+  const [issuePrefix, setIssuePrefix] = useState("");
+  const issuePrefixValid = /^[A-Z0-9]{2,8}$/.test(issuePrefix);
 
   // Sync local state from selected company
   useEffect(() => {
@@ -50,6 +56,7 @@ export function CompanySettings() {
     setBrandColor(selectedCompany.brandColor ?? "");
     setAttachmentMaxMiB(String(Math.round((selectedCompany.attachmentMaxBytes ?? DEFAULT_COMPANY_ATTACHMENT_MAX_BYTES) / BYTES_PER_MIB)));
     setLogoUrl(selectedCompany.logoUrl ?? "");
+    setIssuePrefix((selectedCompany.issuePrefix ?? "").toUpperCase());
   }, [selectedCompany]);
 
   const attachmentMaxBytes = Number.parseInt(attachmentMaxMiB, 10) * BYTES_PER_MIB;
@@ -64,7 +71,8 @@ export function CompanySettings() {
     (companyName !== selectedCompany.name ||
       description !== (selectedCompany.description ?? "") ||
       brandColor !== (selectedCompany.brandColor ?? "") ||
-      attachmentMaxBytes !== (selectedCompany.attachmentMaxBytes ?? DEFAULT_COMPANY_ATTACHMENT_MAX_BYTES));
+      attachmentMaxBytes !== (selectedCompany.attachmentMaxBytes ?? DEFAULT_COMPANY_ATTACHMENT_MAX_BYTES) ||
+      issuePrefix !== (selectedCompany.issuePrefix ?? "").toUpperCase());
 
   const generalMutation = useMutation({
     mutationFn: (data: {
@@ -72,9 +80,11 @@ export function CompanySettings() {
       description: string | null;
       brandColor: string | null;
       attachmentMaxBytes: number;
+      issuePrefix?: string;
     }) => companiesApi.update(selectedCompanyId!, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.companies.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.companies.detail(selectedCompanyId!) });
     }
   });
 
@@ -180,11 +190,13 @@ export function CompanySettings() {
   }
 
   function handleSaveGeneral() {
+    const normalizedPrefix = issuePrefix.trim().toUpperCase();
     generalMutation.mutate({
       name: companyName.trim(),
       description: description.trim() || null,
       brandColor: brandColor || null,
-      attachmentMaxBytes
+      attachmentMaxBytes,
+      issuePrefix: normalizedPrefix,
     });
   }
 
@@ -220,6 +232,44 @@ export function CompanySettings() {
               placeholder="Optional company description"
               onChange={(e) => setDescription(e.target.value)}
             />
+          </Field>
+          <Field
+            label="Issue prefix"
+            hint="2–8 uppercase letters or digits. Used in every task identifier (e.g. <prefix>-3 = LOV-3). Must be unique across companies."
+          >
+            <div className="flex items-center gap-2">
+              <input
+                aria-label="Issue prefix"
+                data-testid="company-settings-issue-prefix-input"
+                className="w-32 rounded-md border border-border bg-transparent px-2.5 py-1.5 font-mono text-sm uppercase tracking-widest outline-none placeholder:text-muted-foreground/40"
+                type="text"
+                maxLength={8}
+                value={issuePrefix}
+                placeholder="LOV"
+                onChange={(e) => {
+                  // Strip non-alphanumeric on input so the field stays in
+                  // the exact shape the validator accepts.
+                  const next = e.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9]/g, "")
+                    .slice(0, 8);
+                  setIssuePrefix(next);
+                }}
+              />
+              <span className="font-mono text-xs text-muted-foreground">
+                Tasks look like
+                {" "}
+                <span className="rounded bg-muted px-1.5 py-0.5 font-bold text-foreground">
+                  {issuePrefix || "XXX"}
+                </span>
+                -3
+              </span>
+            </div>
+            {!issuePrefixValid && (
+              <span className="mt-1 font-mono text-[11px] text-destructive">
+                Must be 2–8 uppercase letters or digits.
+              </span>
+            )}
           </Field>
         </div>
       </div>
@@ -351,7 +401,7 @@ export function CompanySettings() {
           <Button
             size="sm"
             onClick={handleSaveGeneral}
-            disabled={generalMutation.isPending || !companyName.trim() || !attachmentMaxValid}
+            disabled={generalMutation.isPending || !companyName.trim() || !attachmentMaxValid || !issuePrefixValid}
           >
             {generalMutation.isPending ? "Saving..." : "Save changes"}
           </Button>

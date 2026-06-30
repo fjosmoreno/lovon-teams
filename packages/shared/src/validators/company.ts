@@ -22,6 +22,19 @@ export const createCompanySchema = z.object({
 
 export type CreateCompany = z.infer<typeof createCompanySchema>;
 
+/**
+ * Issue-prefix validator: 2-8 uppercase A-Z / 0-9.
+ *
+ * 2-char minimum so a single vowel doesn't blow up the prefix when the
+ * company name is short ("AI Co" → "ACO", not just "A"). 8-cap because
+ * GitHub-style industry conventions stay readable inside that bound.
+ */
+const issuePrefixSchema = z
+  .string()
+  .min(2)
+  .max(8)
+  .regex(/^[A-Z0-9]+$/, "Issue prefix must be 2-8 uppercase letters or digits");
+
 export const updateCompanySchema = createCompanySchema
   .partial()
   .extend({
@@ -35,6 +48,7 @@ export const updateCompanySchema = createCompanySchema
     brandColor: brandColorSchema,
     logoAssetId: logoAssetIdSchema,
     attachmentMaxBytes: attachmentMaxBytesSchema.optional(),
+    issuePrefix: issuePrefixSchema.optional(),
   });
 
 export type UpdateCompany = z.infer<typeof updateCompanySchema>;

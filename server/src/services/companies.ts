@@ -1,4 +1,4 @@
-import { and, count, eq, gte, inArray, isNull, lt, notInArray, sql } from "drizzle-orm";
+import { and, count, eq, gte, inArray, isNull, lt, not, notInArray, sql } from "drizzle-orm";
 import type { Db } from "@paperclipai/db";
 import {
   companies,
@@ -199,14 +199,41 @@ export function companyService(db: Db) {
       .leftJoin(companyLogos, eq(companyLogos.companyId, companies.id));
   }
 
+  /**
+   * Derive a human-readable 3-letter base prefix from a company name.
+   *
+   * Strategy: take the first 3 *consonants* of the uppercased / alphabet-only
+   * name (so "Lovon Teams" → "LVN", not just "LOV"). If the name has fewer
+   * than 3 consonants, fall back to padding with consonants from the
+   * beginning of the alphabet. If there are NO consonants (e.g. a name like
+   * "AEIOU"), fall back to ISSUE_PREFIX_FALLBACK ("CMP"). This produces
+   * cleaner prefixes than upstream's "first 3 chars" approach while
+   * staying within the 8-char cap of the shared validator.
+   */
   function deriveIssuePrefixBase(name: string) {
-    const normalized = name.toUpperCase().replace(/[^A-Z]/g, "");
-    return normalized.slice(0, 3) || ISSUE_PREFIX_FALLBACK;
+    const cleaned = name.toUpperCase().replace(/[^A-Z]/g, "");
+    const consonants = cleaned.replace(/[AEIOU]/g, "");
+    if (consonants.length >= 3) return consonants.slice(0, 3);
+    if (cleaned.length >= 3) return cleaned.slice(0, 3);
+    const padded = (consonants + cleaned + "CMS").slice(0, 3);
+    return padded.toUpperCase() || ISSUE_PREFIX_FALLBACK;
   }
 
+  /**
+   * Counter-style suffix for issue-prefix conflicts.
+   *
+   * attempt=1: just the base ("LVN")
+   * attempt=2: base + "2" ("LVN2")
+   * attempt=3: base + "3" ("LVN3")
+   * attempt>=10: base + "10", "11", …
+   *
+   * Replaces upstream's "A".repeat(attempt - 1) which would produce
+   *   "LVN" → "LVNA" → "LVNAA" → …
+   * — readable, but ugly, and trivially mistakable for a real word.
+   */
   function suffixForAttempt(attempt: number) {
     if (attempt <= 1) return "";
-    return "A".repeat(attempt - 1);
+    return String(attempt);
   }
 
   function isIssuePrefixConflict(error: unknown) {
@@ -281,9 +308,40 @@ export function companyService(db: Db) {
           .then((rows) => rows[0] ?? null);
         if (!existing) return null;
 
-        const { logoAssetId, ...companyPatch } = data;
+        const { logoAssetId, ...restPatch } = data;
+        let companyPatch: typeof restPatch = restPatch;
         const willReactivate = existing.status !== "active" && companyPatch.status === "active";
         const willArchive = existing.status !== "archived" && companyPatch.status === "archived";
+
+        // Manual issue-prefix change: verify uniqueness against every OTHER
+        // company before the tx write, so the user gets a clean 422 instead
+        // of a raw 500 from the unique-index violation inside Drizzle.
+        if (
+          typeof companyPatch.issuePrefix === "string"
+          && companyPatch.issuePrefix !== existing.issuePrefix
+        ) {
+          const normalized = companyPatch.issuePrefix.trim().toUpperCase();
+          if (!/^[A-Z0-9]{2,8}$/.test(normalized)) {
+            throw unprocessable(
+              "Issue prefix must be 2-8 uppercase letters or digits",
+            );
+          }
+          const taken = await tx
+            .select({ id: companies.id })
+            .from(companies)
+            .where(and(
+              eq(companies.issuePrefix, normalized),
+              not(eq(companies.id, id)),
+            ))
+            .then((rows) => rows[0] ?? null);
+          if (taken) {
+            throw unprocessable(
+              `Issue prefix "${normalized}" is already used by another company`,
+            );
+          }
+          // Persist the normalized form so we never store mixed-case.
+          companyPatch = { ...companyPatch, issuePrefix: normalized };
+        }
 
         if (logoAssetId !== undefined && logoAssetId !== null) {
           const nextLogoAsset = await tx

@@ -37,6 +37,7 @@ export const companiesApi = {
         | "feedbackDataSharingEnabled"
         | "brandColor"
         | "logoAssetId"
+        | "issuePrefix"
       >
     >,
   ) => api.patch<Company>(`/companies/${companyId}`, data),
