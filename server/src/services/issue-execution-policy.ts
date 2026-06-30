@@ -602,7 +602,18 @@ function canAutoSkipPendingStage(input: {
   returnAssignee: IssueExecutionStagePrincipal | null;
   requestedStatus?: string;
 }) {
-  if (input.requestedStatus !== "done" || input.stage.type !== "review" || !input.returnAssignee) {
+  // Auto-skip a review stage when its only participant is the same as the
+  // returnAssignee. This happens when an issue is assigned to an agent
+  // who is also the sole reviewer in the policy — self-review is a
+  // no-op so we jump straight to the next stage. This path is allowed
+  // for both `requestedStatus === "done"` (board-approval skip) and
+  // `requestedStatus === "in_review"` (manual workflow restart), so
+  // users can revive a blocked issue without first having to send a
+  // comment to the agent just to satisfy a meaningless self-review.
+  if (input.stage.type !== "review" || !input.returnAssignee) {
+    return false;
+  }
+  if (input.requestedStatus !== "done" && input.requestedStatus !== "in_review") {
     return false;
   }
   return input.stage.participants.length > 0 &&
