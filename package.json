@@ -1,6 +1,15 @@
 {
-  "name": "paperclip",
+  "name": "lovon-teams",
   "private": true,
+  "description": "Lovon Teams — the free-tier-first fork of Paperclip. Orchestrate teams of AI agents starting at $0 API spend. See NOTICE for upstream attribution.",
+  "homepage": "https://github.com/fjosmoreno/lovon-teams",
+  "bugs": {
+    "url": "https://github.com/fjosmoreno/lovon-teams/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fjosmoreno/lovon-teams.git"
+  },
   "type": "module",
   "scripts": {
     "postinstall": "node scripts/link-plugin-dev-sdk.mjs",

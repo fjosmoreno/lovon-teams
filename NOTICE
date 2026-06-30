@@ -1,0 +1,52 @@
+# Lovon Teams — Derivative Work Notice
+
+**Lovon Teams** is an open-source fork of [Paperclip](https://github.com/paperclipai/paperclip),
+an AI agent orchestration platform originally developed by Paperclip Labs, Inc.
+
+## Original Software
+
+- **Project:** [Paperclip](https://paperclip.ing) — "The open-source app everyone uses to manage agents at work."
+- **Original Repository:** https://github.com/paperclipai/paperclip
+- **Original Copyright:** (c) 2025 Paperclip AI
+- **Original License:** MIT (see `LICENSE` file in the root of this repository)
+
+The full text of the MIT License is preserved verbatim in the root `LICENSE` file.
+The MIT terms apply to all original Paperclip code that remains in this repository.
+
+## Modifications for Lovon Teams
+
+Modifications and additions made by Fernando Moreno for the **Lovon Teams** project:
+
+- **Lovon Teams branding** — product name, user-facing copy, and UI labels.
+- **Lovon Free Provider system** — packaged adapters and documentation for free-tier AI providers
+  (Groq, GitHub Models, Cloudflare Workers AI, Hugging Face Inference, Cohere, Mistral,
+  OpenRouter free models). This is the primary differentiator versus upstream Paperclip.
+- **Headroom token-optimization layer integration** — optional documentation and config hooks
+  for routing Lovon Teams traffic through a Headroom-compatible proxy.
+- **Documentation updates** — README, `doc/`, and onboarding instructions tailored to Lovon Teams.
+
+The intent of these modifications is to preserve upstream Paperclip behavior verbatim while
+making the project usable by individuals and small teams that want to start without paying
+for premium AI API plans.
+
+## Lovon Teams Copyright
+
+Copyright (c) 2026 Fernando Moreno <fjosmoreno@gmail.com>
+
+Modifications and additions made for Lovon Teams are also released under the **MIT License**,
+the same license as the upstream Paperclip project. See root `LICENSE` for full terms.
+
+## Upstream Sync Policy
+
+Lovon Teams tracks upstream Paperclip for bug fixes and security updates.
+The remote `upstream` is configured to `https://github.com/paperclipai/paperclip.git` so that
+maintainers can sync selectively. Rebase merges from upstream are welcome; please preserve the
+original commit author metadata so the contribution history remains intact.
+
+## Trademarks
+
+"Paperclip" and the Paperclip logo are trademarks of Paperclip Labs, Inc.
+"Lovon" and "Lovon Teams" are trademarks of Fernando Moreno / Lovon.
+
+This repository is **not** affiliated with, endorsed by, or sponsored by Paperclip Labs, Inc.
+It is an independent community fork distributed under the terms of the MIT License.

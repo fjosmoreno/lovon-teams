@@ -2,10 +2,19 @@
 
 Guidance for human and AI contributors working in this repository.
 
+> **This is the Lovon Teams fork.** Lovon Teams is a derivative work based on Paperclip
+> (see [`NOTICE`](./NOTICE) for attribution). Engineering guidance below mirrors upstream
+> Paperclip's `AGENTS.md`; Lovon-specific additions are marked with **🟢 Lovon** tags.
+
 ## 1. Purpose
 
-Paperclip is a control plane for AI-agent companies.
+Lovon Teams (upstream: Paperclip) is a control plane for AI-agent companies.
 The current implementation target is V1 and is defined in `doc/SPEC-implementation.md`.
+
+🟢 **Lovon Teams mission:** lower the cost of entry to "AI agent company" orchestration by
+shipping first-class adapters and documentation for free-tier AI providers (Groq, GitHub
+Models, Cloudflare Workers AI, Hugging Face, Cohere, Mistral, OpenRouter) plus an optional
+[Headroom](https://docs.headroom.sh) token-optimization integration.
 
 ## 2. Read This First
 
