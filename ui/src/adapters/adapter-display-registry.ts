@@ -73,14 +73,21 @@ const adapterDisplayMap: Record<string, AdapterDisplayInfo> = {
     recommended: true,
   },
   gemini_local: {
-    label: "Gemini CLI",
-    description: "Local Gemini agent",
+    label: "Lovon · Gemini Free",
+    description: "Local Gemini agent (free Google AI Studio tier)",
     icon: Gem,
+    recommended: true,
   },
   grok_local: {
     label: "Grok Build",
     description: "Local Grok Build agent",
     icon: Bot,
+  },
+  lovon_groq_free: {
+    label: "Lovon · Groq Free",
+    description: "Groq free tier (Llama, Mixtral, Gemma) — REST API, no CLI",
+    icon: Bot,
+    recommended: true,
   },
   hermes_gateway: {
     label: "Hermes",

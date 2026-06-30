@@ -1,0 +1,23 @@
+{
+  "name": "@lovon-teams/adapter-groq-free",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Lovon Teams adapter for the Groq free tier (REST API, no local CLI required).",
+  "homepage": "https://github.com/fjosmoreno/lovon-teams",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server/index.ts"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@paperclipai/adapter-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.21",
+    "typescript": "^5.7.3"
+  }
+}

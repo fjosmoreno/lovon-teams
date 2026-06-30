@@ -93,6 +93,15 @@ import {
   models as grokModels,
 } from "@paperclipai/adapter-grok-local";
 import {
+  execute as lovonGroqFreeExecute,
+  testEnvironment as lovonGroqFreeTestEnvironment,
+} from "@lovon-teams/adapter-groq-free/server";
+import {
+  agentConfigurationDoc as lovonGroqFreeAgentConfigurationDoc,
+  models as lovonGroqFreeModels,
+  modelProfiles as lovonGroqFreeModelProfiles,
+} from "@lovon-teams/adapter-groq-free";
+import {
   createHermesGatewayServerAdapter,
   createHermesLocalServerAdapter,
 } from "@paperclipai/hermes-paperclip-adapter";
@@ -400,6 +409,23 @@ const piLocalAdapter: ServerAdapterModule = {
   agentConfigurationDoc: piAgentConfigurationDoc,
 };
 
+/**
+ * Lovon Teams · Groq Free adapter — REST-only adapter for the Groq free tier.
+ * No local CLI required; the agent needs only a GROQ_API_KEY environment
+ * variable (free signup at https://console.groq.com).
+ */
+const lovonGroqFreeAdapter: ServerAdapterModule = {
+  type: "lovon_groq_free",
+  execute: lovonGroqFreeExecute,
+  testEnvironment: lovonGroqFreeTestEnvironment,
+  models: lovonGroqFreeModels,
+  modelProfiles: lovonGroqFreeModelProfiles,
+  supportsLocalAgentJwt: false,
+  supportsInstructionsBundle: false,
+  requiresMaterializedRuntimeSkills: false,
+  agentConfigurationDoc: lovonGroqFreeAgentConfigurationDoc,
+};
+
 const adaptersByType = new Map<string, ServerAdapterModule>();
 
 // For builtin types that are overridden by an external adapter, we keep the
@@ -422,6 +448,7 @@ function registerBuiltInAdapters() {
     cursorLocalAdapter,
     geminiLocalAdapter,
     grokLocalAdapter,
+    lovonGroqFreeAdapter,
     hermesGatewayAdapter,
     hermesLocalAdapter,
     openclawGatewayAdapter,
