@@ -62,6 +62,7 @@ import { clearIssueExecutionRun, removeLiveRunById, upsertInterruptedRun } from 
 import { useProjectOrder } from "../hooks/useProjectOrder";
 import { relativeTime, cn, formatDurationMs, formatTokens, visibleRunCostUsd } from "../lib/utils";
 import { ApprovalCard } from "../components/ApprovalCard";
+import { ExecutionReviewGateCard } from "../components/ExecutionReviewGateCard";
 import { InlineEditor } from "../components/InlineEditor";
 import {
   IssueChatThread,
@@ -4193,6 +4194,25 @@ export function IssueDetail() {
       })()}
 
       <Separator />
+
+      {/* Inline execution-policy review/approval gate — visible regardless of the
+          active tab so the user always sees the pending action item. */}
+      {issue.status === "in_review" && issue.executionState?.currentStageType ? (
+        <ExecutionReviewGateCard
+          issueId={issue.id}
+          status={issue.executionState.status ?? null}
+          currentStageId={issue.executionState.currentStageId ?? null}
+          currentStageType={issue.executionState.currentStageType ?? null}
+          currentParticipant={issue.executionState.currentParticipant ?? null}
+          currentUserId={currentUserId}
+          stageLabel={issue.executionState.currentStageType === "review" ? "Review" : "Approval"}
+          onApprove={(comment) => updateIssue.mutate({ status: "done", comment })}
+          onRequestChanges={(comment) =>
+            updateIssue.mutate({ status: "in_progress", comment })
+          }
+          isUpdating={updateIssue.isPending}
+        />
+      ) : null}
 
       <Tabs value={detailTab} onValueChange={setDetailTab} className="space-y-3">
         <TabsList variant="line" className="w-full justify-start gap-1">
