@@ -72,6 +72,7 @@ import {
   shouldRedirectCompanylessRouteToOnboarding,
 } from "./lib/onboarding-route";
 import { normalizeRememberedInstanceSettingsPath } from "./lib/instance-settings";
+import { ArrowRight } from "lucide-react";
 
 function boardRoutes() {
   return (
@@ -365,21 +366,141 @@ function NoCompaniesStartPage() {
   const { openOnboarding } = useDialogActions();
   const { t } = useTranslation();
 
+  // Lovon Teams — landing page for first-time users.
+  // Dark + bold + neon accent style (similar to NFT / crypto hero pages).
+  const freeProviders = [
+    { id: "gemini",   name: "Gemini Free",     note: "Google AI Studio" },
+    { id: "groq",     name: "Groq Free",       note: "Llama · Mixtral" },
+    { id: "gh-models", name: "GitHub Models",  note: "GPT-4o · Claude · Llama" },
+    { id: "cloudflare", name: "Cloudflare AI", note: "Workers AI" },
+    { id: "hf",       name: "Hugging Face",    note: "Inference API" },
+    { id: "cohere",   name: "Cohere Trial",    note: "Command R+" },
+    { id: "mistral",  name: "Mistral Free",    note: "La Plateforme" },
+    { id: "openrouter", name: "OpenRouter",    note: "Free models" },
+  ];
+
   return (
-    <div className="mx-auto max-w-xl py-10">
-      <div className="rounded-lg border border-border bg-card p-6">
-        <h1 className="text-xl font-semibold">
-          {t("app.noCompanies.title", { defaultValue: "Create your first company" })}
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("app.noCompanies.description", { defaultValue: "Get started by creating a company." })}
-        </p>
-        <div className="mt-4">
-          <Button onClick={() => openOnboarding()}>
-            {t("app.noCompanies.newCompany", { defaultValue: "New Company" })}
-          </Button>
-        </div>
-      </div>
+    <div
+      className="relative isolate min-h-screen overflow-hidden bg-[#0a0a1a] text-slate-100"
+      style={{
+        backgroundImage:
+          "radial-gradient(ellipse 80% 50% at 20% 0%, rgba(124, 58, 237, 0.25), transparent 60%), radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34, 197, 94, 0.18), transparent 60%)",
+      }}
+    >
+      {/* Glow accents */}
+      <div className="pointer-events-none absolute -top-32 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-violet-500/20 blur-3xl" aria-hidden="true" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-96 w-96 rounded-full bg-emerald-500/10 blur-3xl" aria-hidden="true" />
+
+      <main className="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-12 lg:px-10">
+        {/* Top bar */}
+        <header className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-gradient-to-br from-violet-500 to-emerald-400 font-bold text-slate-950">
+              L
+            </div>
+            <span className="font-mono text-sm tracking-[0.24em] text-slate-300">LOVON TEAMS</span>
+          </div>
+          <span className="rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-mono text-[11px] uppercase tracking-widest text-emerald-300">
+            Beta · Free tier ready
+          </span>
+        </header>
+
+        {/* Hero */}
+        <section className="flex flex-1 flex-col items-center justify-center py-16 text-center">
+          <h1 className="max-w-3xl text-balance text-5xl font-extrabold leading-[1.05] tracking-tight md:text-6xl lg:text-7xl">
+            Run an{" "}
+            <span className="bg-gradient-to-r from-violet-300 via-fuchsia-300 to-emerald-300 bg-clip-text text-transparent">
+              AI-agent company
+            </span>{" "}
+            starting at{" "}
+            <span className="relative inline-block">
+              <span className="relative z-10 text-emerald-300">$0</span>
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-1 left-0 h-1 w-full rounded bg-gradient-to-r from-emerald-400 to-violet-400"
+              />
+            </span>
+            .
+          </h1>
+
+          <p className="mt-6 max-w-xl text-pretty text-base text-slate-300 md:text-lg">
+            Lovon Teams is the control plane for orchestrating teams of AI agents.
+            Hire a CEO, a CTO, engineers, designers — any agent, any free-tier provider —
+            and watch them run your business around the clock.
+          </p>
+
+          {/* CTAs */}
+          <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">
+            <Button
+              size="lg"
+              onClick={() => openOnboarding()}
+              className="group h-12 rounded-full bg-emerald-500 px-7 font-semibold text-slate-950 shadow-[0_0_40px_-10px_rgba(34,197,94,0.6)] transition hover:bg-emerald-400"
+            >
+              Start free
+              <ArrowRight className="ml-2 h-4 w-4 transition group-hover:translate-x-1" />
+            </Button>
+            <a
+              href="https://github.com/fjosmoreno/lovon-teams"
+              target="_blank"
+              rel="noreferrer noopener"
+              className="cursor-pointer text-sm text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline"
+            >
+              See the code on GitHub
+            </a>
+          </div>
+
+          <p className="mt-4 font-mono text-[11px] uppercase tracking-widest text-slate-500">
+            No credit card · 8 free providers · MIT licensed
+          </p>
+        </section>
+
+        {/* Provider grid */}
+        <section className="pb-16">
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="font-mono text-xs uppercase tracking-[0.24em] text-slate-400">
+              Lovon Free Providers
+            </h2>
+            <span className="font-mono text-[11px] text-slate-500">
+              Powered by community free tiers · Swap providers anytime
+            </span>
+          </div>
+
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+            {freeProviders.map((p) => (
+              <li
+                key={p.id}
+                className="group rounded-xl border border-white/5 bg-white/[0.03] p-4 backdrop-blur transition hover:border-emerald-400/30 hover:bg-white/[0.05]"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(34,197,94,0.6)]" aria-hidden="true" />
+                  <span className="text-sm font-semibold text-slate-100">{p.name}</span>
+                </div>
+                <p className="mt-1 text-xs text-slate-400">{p.note}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* Footer */}
+        <footer className="border-t border-white/5 pt-6 text-xs text-slate-500">
+          <div className="flex flex-col items-start justify-between gap-2 sm:flex-row sm:items-center">
+            <span>
+              Lovon Teams · open-source under MIT · derived from{" "}
+              <a
+                href="https://github.com/paperclipai/paperclip"
+                target="_blank"
+                rel="noreferrer noopener"
+                className="cursor-pointer text-slate-300 underline-offset-4 hover:text-slate-100 hover:underline"
+              >
+                Paperclip
+              </a>
+            </span>
+            <span className="font-mono uppercase tracking-widest">
+              v0.1 · {new Date().getFullYear()}
+            </span>
+          </div>
+        </footer>
+      </main>
     </div>
   );
 }
