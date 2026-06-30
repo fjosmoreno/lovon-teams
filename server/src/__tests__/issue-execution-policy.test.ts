@@ -598,6 +598,87 @@ describe("issue execution policy transitions", () => {
       // No error — just no patch modifications
       expect(result.patch).toEqual({});
     });
+
+    it("future-stage participant can fast-forward through current agent-owned stage", () => {
+      // The CTO is a participant on the *approval* stage but not on the
+      // *review* stage. The review stage is still showing the agent as
+      // the current participant (it never advanced). The CTO clicks
+      // Approve. Without fast-forward authority, the throw fires; with
+      // it, the review stage completes and the approval stage becomes
+      // active with the CTO as the current participant.
+      const result = applyIssueExecutionPolicyTransition({
+        issue: {
+          status: "in_review",
+          assigneeAgentId: qaAgentId,
+          assigneeUserId: null,
+          executionPolicy: policy,
+          executionState: {
+            status: "pending",
+            currentStageId: reviewStageId,
+            currentStageIndex: 0,
+            currentStageType: "review",
+            currentParticipant: { type: "agent", agentId: qaAgentId },
+            returnAssignee: { type: "agent", agentId: coderAgentId },
+            completedStageIds: [],
+            lastDecisionId: null,
+            lastDecisionOutcome: null,
+          },
+        },
+        policy,
+        requestedStatus: "done",
+        requestedAssigneePatch: {},
+        actor: { userId: ctoUserId },
+        commentBody: "Fast-forwarding through stuck review",
+      });
+
+      // The issue stays in_review because the workflow has not fully
+      // completed — it advanced to the approval stage, not the terminal.
+      expect(result.patch.status).toBe("in_review");
+      // The execution state should now point at the approval stage.
+      expect(result.patch.executionState).toMatchObject({
+        status: "pending",
+        currentStageType: "approval",
+        currentParticipant: { type: "user", userId: ctoUserId },
+        completedStageIds: expect.arrayContaining([reviewStageId]),
+      });
+      // The decision should be recorded for the review stage.
+      expect(result.decision).toMatchObject({
+        stageId: reviewStageId,
+        stageType: "review",
+        outcome: "approved",
+        body: "Fast-forwarding through stuck review",
+      });
+    });
+
+    it("random non-participant user still cannot fast-forward", () => {
+      // boardUserId is not on ANY stage — they should still be rejected.
+      expect(() =>
+        applyIssueExecutionPolicyTransition({
+          issue: {
+            status: "in_review",
+            assigneeAgentId: qaAgentId,
+            assigneeUserId: null,
+            executionPolicy: policy,
+            executionState: {
+              status: "pending",
+              currentStageId: reviewStageId,
+              currentStageIndex: 0,
+              currentStageType: "review",
+              currentParticipant: { type: "agent", agentId: qaAgentId },
+              returnAssignee: { type: "agent", agentId: coderAgentId },
+              completedStageIds: [],
+              lastDecisionId: null,
+              lastDecisionOutcome: null,
+            },
+          },
+          policy,
+          requestedStatus: "done",
+          requestedAssigneePatch: {},
+          actor: { userId: boardUserId },
+          commentBody: "Hijacking the workflow",
+        }),
+      ).toThrow("Only the active reviewer or approver can advance");
+    });
   });
 
   describe("comment requirements", () => {

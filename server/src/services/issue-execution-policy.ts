@@ -780,15 +780,88 @@ function applyIssueExecutionStageTransition(input: TransitionInput): TransitionR
       !principalsEqual(existingState?.currentParticipant ?? null, currentParticipant);
     const actorIsStageParticipant = stageHasParticipant(activeStage, actor);
 
+    // Fast-forward authority: if the actor is configured as a participant on
+    // any *later* stage in the same policy (i.e. they're a reviewer or
+    // approver downstream), allow them to advance through an agent-owned
+    // stage that hasn't moved. This unblocks the common case where the
+    // assigned agent never completed its review but the human approver is
+    // waiting to close the loop. Without this, the workflow can deadlock
+    // when the agent stalls mid-review.
+    const actorIsFutureStageParticipant =
+      input.policy?.stages.some(
+        (stage) => stage.id !== activeStage.id && stageHasParticipant(stage, actor),
+      ) ?? false;
+    const actorCanAdvance = actorIsStageParticipant || actorIsFutureStageParticipant;
+
     // The previous throw was gated on "stage has not drifted" which is the
     // *opposite* of the user-facing intent. A board member clicking Approve
     // is supposed to advance the stage they're listed on, even when the
     // active participant is still recorded as the agent (a common state
     // when the agent auto-submits before the user takes over). The right
     // check is: is the actor one of this stage's configured reviewers /
-    // approvers? If yes, allow; if no, deny.
-    if (attemptedStageAdvance && !actorIsStageParticipant && !stageStateDrifted) {
+    // approvers, OR a downstream reviewer/approver with fast-forward
+    // authority? If yes, allow; if no, deny.
+    if (attemptedStageAdvance && !actorCanAdvance && !stageStateDrifted) {
       throw unprocessable("Only the active reviewer or approver can advance the current execution stage");
+    }
+
+    // Fast-forward path: when the actor is a future-stage participant (e.g.
+    // an approver downstream) but not the current stage's participant, run
+    // the same stage-advance logic on their behalf so the workflow actually
+    // progresses. Without this, the throw bypass above would mark the issue
+    // `done` while leaving `executionState` stuck on the agent-owned stage.
+    if (
+      actorIsFutureStageParticipant &&
+      !actorIsStageParticipant &&
+      requestedStatus === "done" &&
+      input.commentBody?.trim()
+    ) {
+      const approvedState = buildCompletedState(existingState, activeStage);
+      const nextStage = nextPendingStage(
+        input.policy,
+        { ...approvedState, completedStageIds: approvedState.completedStageIds },
+      );
+
+      if (!nextStage) {
+        patch.executionState = approvedState;
+        return {
+          patch,
+          decision: {
+            stageId: activeStage.id,
+            stageType: activeStage.type,
+            outcome: "approved",
+            body: input.commentBody.trim(),
+          },
+        };
+      }
+
+      const participant = selectStageParticipant(nextStage, {
+        preferred: explicitAssignee,
+        exclude: existingState?.returnAssignee ?? null,
+      });
+      if (!participant) {
+        throw unprocessable(`No eligible ${nextStage.type} participant is configured for this issue`);
+      }
+
+      buildPendingStagePatch({
+        patch,
+        previous: approvedState,
+        policy: input.policy,
+        stage: nextStage,
+        participant,
+        returnAssignee: existingState?.returnAssignee ?? currentAssignee ?? actor,
+        reviewRequest: input.reviewRequest ?? null,
+      });
+      return {
+        patch,
+        decision: {
+          stageId: activeStage.id,
+          stageType: activeStage.type,
+          outcome: "approved",
+          body: input.commentBody.trim(),
+        },
+        workflowControlledAssignment: true,
+      };
     }
 
     if (stageStateDrifted) {

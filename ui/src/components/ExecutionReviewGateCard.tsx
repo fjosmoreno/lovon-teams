@@ -85,7 +85,15 @@ export function ExecutionReviewGateCard({
     status === "pending" &&
     (currentStageType === "review" || currentStageType === "approval") &&
     matchParticipant(currentParticipant, currentUserId);
-  const isManualReviewGate = currentUserId !== null;
+  // Manual review gate is ONLY the fallback when there is no execution
+  // policy configured. When a policy IS configured but the user isn't
+  // the current participant (e.g. they're an approver on a later stage
+  // while the agent owns the current review stage), we must not show
+  // the button — the server would reject the advance. Instead, the
+  // user is shown a "waiting for the active participant" hint by the
+  // parent page.
+  const isManualReviewGate =
+    currentStageType === null && currentUserId !== null;
   const visible = hasPolicyStage || isManualReviewGate;
 
   if (!visible) return null;
