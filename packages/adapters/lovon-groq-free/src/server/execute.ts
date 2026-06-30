@@ -10,6 +10,13 @@ import type {
   AdapterExecutionContext,
   AdapterExecutionResult,
 } from "@paperclipai/adapter-utils";
+import {
+  DEFAULT_PAPERCLIP_AGENT_PROMPT_TEMPLATE,
+  buildPaperclipEnv,
+  joinPromptSections,
+  renderPaperclipWakePrompt,
+  renderTemplate,
+} from "@paperclipai/adapter-utils/server-utils";
 
 const GROQ_CHAT_COMPLETIONS_URL = "https://api.groq.com/openai/v1/chat/completions";
 const REQUEST_TIMEOUT_MS = 60_000;
@@ -58,15 +65,21 @@ function resolveModel(ctx: AdapterExecutionContext): string {
 }
 
 function resolvePrompt(ctx: AdapterExecutionContext): string {
-  const direct = readString(ctx.context.prompt);
-  if (direct) return direct;
+  // Mirror the upstream gemini_local pattern: build the prompt from the
+  // Paperclip wake payload (heartbeat reason + issue context) joined with
+  // the agent's configured promptTemplate. Direct ctx.context.prompt is
+  // intentionally ignored because Paperclip never sets it — it always
+  // routes through paperclipWake + promptTemplate.
+  const promptTemplate = readString(ctx.config.promptTemplate) ?? DEFAULT_PAPERCLIP_AGENT_PROMPT_TEMPLATE;
 
-  // Some invocation paths pass the prompt inside `context.issue` or `context.wake`.
-  const wake = ctx.context.wake as Record<string, unknown> | undefined;
-  const wakePrompt = readString(wake?.prompt);
-  if (wakePrompt) return wakePrompt;
+  const wakePrompt = renderPaperclipWakePrompt(ctx.context.paperclipWake);
+  const renderedPrompt = renderTemplate(promptTemplate, {
+    agent: ctx.agent,
+    run: { id: ctx.runId },
+    context: ctx.context,
+  });
 
-  return "";
+  return joinPromptSections([wakePrompt, renderedPrompt]);
 }
 
 export async function execute(
