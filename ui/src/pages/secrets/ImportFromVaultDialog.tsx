@@ -284,10 +284,10 @@ function validateDraftRow(
 
   for (const existingSecret of existing) {
     if (existingSecret.name.trim().toLowerCase() === lowerName) {
-      return "A Paperclip secret already uses this name.";
+      return "A Lovon Teams secret already uses this name.";
     }
     if (existingSecret.key.trim().toLowerCase() === lowerKey) {
-      return "A Paperclip secret already uses this key.";
+      return "A Lovon Teams secret already uses this key.";
     }
   }
 
@@ -658,7 +658,7 @@ export function ImportFromVaultDialog({
               Import from AWS Secrets Manager
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
-              Bring AWS-managed secrets into Paperclip as external references.
+              Bring AWS-managed secrets into Lovon Teams as external references.
             </DialogDescription>
             <Stepper step={step} />
           </div>

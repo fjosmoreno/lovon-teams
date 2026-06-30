@@ -237,9 +237,9 @@ export function SystemNoticeUxLab() {
           <SystemNotice
             tone="danger"
             label="System alert"
-            source={{ label: "Paperclip", href: "/PAP/agents" }}
+            source={{ label: "Lovon Teams", href: "/PAP/agents" }}
             timestamp="2026-05-04T16:48:00.000Z"
-            body="Paperclip could not resolve this issue's missing disposition automatically. The issue is blocked on a recovery owner."
+            body="Lovon Teams could not resolve this issue's missing disposition automatically. The issue is blocked on a recovery owner."
             metadata={[
               {
                 title: "Recovery owner",
@@ -318,7 +318,7 @@ export function SystemNoticeUxLab() {
             </div>
             <p className="px-1 text-xs text-muted-foreground">
               Author reads as <span className="font-medium text-foreground">You</span> even though the
-              author is the Paperclip system. Two containers stack the warning inside a user-style
+              author is the Lovon Teams system. Two containers stack the warning inside a user-style
               bubble, and operational evidence is always visible.
             </p>
           </div>

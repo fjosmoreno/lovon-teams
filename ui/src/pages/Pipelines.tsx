@@ -2916,7 +2916,7 @@ export function PipelineItemDetailView({ pipelineId, caseId }: { pipelineId: str
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <p>
                   Moving this item may skip stage automation, review expectations, and configured transition paths.
-                  Paperclip will still enforce blockers and other hard safety checks.
+                  Lovon Teams will still enforce blockers and other hard safety checks.
                 </p>
               </div>
             </div>
@@ -2966,7 +2966,7 @@ export function PipelineItemDetailView({ pipelineId, caseId }: { pipelineId: str
           <DialogHeader>
             <DialogTitle>{retryDialogScope === "previous_stage" ? "Retry previous step" : "Re-run this step"}</DialogTitle>
             <DialogDescription>
-              Review the automation preflight before Paperclip dispatches a fresh run.
+              Review the automation preflight before Lovon Teams dispatches a fresh run.
             </DialogDescription>
           </DialogHeader>
           {retryPlan.isLoading ? (
@@ -3982,7 +3982,7 @@ function ItemOutputAttachmentRow({ item }: { item: PipelineCaseAttachmentOutputI
           <img src={item.contentPath} alt={filename} className="h-full w-full object-cover" loading="lazy" />
         </a>
       ) : (
-        <Paperclip className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+        <Paperclip className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"  />
       )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
@@ -4063,7 +4063,7 @@ function ItemOutputsSection({
     groups.push({
       key: "attachment",
       label: "Attachments",
-      icon: <Paperclip className="h-4 w-4 text-muted-foreground" />,
+      icon: <Paperclip className="h-4 w-4 text-muted-foreground"  />,
       rows: attachments.map((item) => <ItemOutputAttachmentRow key={item.id} item={item} />),
     });
   }
