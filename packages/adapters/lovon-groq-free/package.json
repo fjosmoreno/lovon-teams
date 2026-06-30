@@ -17,7 +17,7 @@
     "@paperclipai/adapter-utils": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.19.21",
+    "@types/node": "^22.20.0",
     "typescript": "^5.7.3"
   }
 }
