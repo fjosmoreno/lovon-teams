@@ -73,10 +73,20 @@ export function ExecutionReviewGateCard({
   const [approveComment, setApproveComment] = useState(DEFAULT_APPROVE_COMMENT);
   const [changesComment, setChangesComment] = useState(DEFAULT_REQUEST_CHANGES_COMMENT);
 
-  const visible =
+  // Three visibility modes:
+  //   1. Policy-driven review/approval stage with the user as the active
+  //      participant (the original behavior).
+  //   2. NO execution policy configured but the issue is sitting in
+  //      in_review waiting on the user — the manual review path that
+  //      mirrors Paperclip's "Approve / Request changes" controls.
+  //   3. A `changes_requested` state from a prior round of feedback,
+  //      where the user can re-review once the agent resubmits.
+  const hasPolicyStage =
     status === "pending" &&
     (currentStageType === "review" || currentStageType === "approval") &&
     matchParticipant(currentParticipant, currentUserId);
+  const isManualReviewGate = currentUserId !== null;
+  const visible = hasPolicyStage || isManualReviewGate;
 
   if (!visible) return null;
 
@@ -106,13 +116,16 @@ export function ExecutionReviewGateCard({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="font-semibold text-amber-300">{stageLabel} pending — your decision required</span>
-            <span className="font-mono text-[11px] uppercase tracking-widest text-amber-200/60">
-              stage {currentStageId ?? "—"}
-            </span>
+            {currentStageId && (
+              <span className="font-mono text-[11px] uppercase tracking-widest text-amber-200/60">
+                stage {currentStageId}
+              </span>
+            )}
           </div>
           <p className="mt-1 text-sm text-amber-100/80">
-            The agent has handed this task back to you as the {stageLabel.toLowerCase()} gate.
-            Approve to close it out, or request changes to send it back.
+            {currentStageType
+              ? `The agent has handed this task back to you as the ${stageLabel.toLowerCase()} gate. Approve to close it out, or request changes to send it back.`
+              : `The agent marked this task ready for review. Approve to mark it done, or request changes to send it back to the agent with feedback.`}
           </p>
           {agentSubmissionPreview && (
             <div className="mt-2 max-h-24 overflow-y-auto rounded-md border border-amber-400/20 bg-black/30 px-3 py-2 text-[12px] text-amber-100/80">

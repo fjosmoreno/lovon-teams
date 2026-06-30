@@ -4195,17 +4195,29 @@ export function IssueDetail() {
 
       <Separator />
 
-      {/* Inline execution-policy review/approval gate — visible regardless of the
-          active tab so the user always sees the pending action item. */}
-      {issue.status === "in_review" && issue.executionState?.currentStageType ? (
+      {/* Inline review/approval gate — visible whenever the issue is in_review,
+          regardless of whether the company has an execution policy configured.
+          Covers the Paperclip-style "Approve / Request changes" controls that
+          were missing in the default flow. The card itself decides whether
+          the user is the active participant and stays hidden if not. */}
+      {issue.status === "in_review" ? (
         <ExecutionReviewGateCard
           issueId={issue.id}
-          status={issue.executionState.status ?? null}
-          currentStageId={issue.executionState.currentStageId ?? null}
-          currentStageType={issue.executionState.currentStageType ?? null}
-          currentParticipant={issue.executionState.currentParticipant ?? null}
+          status={issue.executionState?.status ?? null}
+          currentStageId={issue.executionState?.currentStageId ?? null}
+          currentStageType={issue.executionState?.currentStageType ?? null}
+          currentParticipant={issue.executionState?.currentParticipant ?? null}
           currentUserId={currentUserId}
-          stageLabel={issue.executionState.currentStageType === "review" ? "Review" : "Approval"}
+          stageLabel={
+            issue.executionState?.currentStageType === "approval"
+              ? "Approval"
+              : "Review"
+          }
+          agentSubmissionPreview={
+            comments.length > 0
+              ? comments[comments.length - 1]?.body?.slice(0, 480) ?? null
+              : null
+          }
           onApprove={(comment) => updateIssue.mutate({ status: "done", comment })}
           onRequestChanges={(comment) =>
             updateIssue.mutate({ status: "in_progress", comment })
