@@ -778,8 +778,16 @@ function applyIssueExecutionStageTransition(input: TransitionInput): TransitionR
       input.issue.status !== "in_review" ||
       !principalsEqual(currentAssignee, currentParticipant) ||
       !principalsEqual(existingState?.currentParticipant ?? null, currentParticipant);
+    const actorIsStageParticipant = stageHasParticipant(activeStage, actor);
 
-    if (attemptedStageAdvance && !stageStateDrifted) {
+    // The previous throw was gated on "stage has not drifted" which is the
+    // *opposite* of the user-facing intent. A board member clicking Approve
+    // is supposed to advance the stage they're listed on, even when the
+    // active participant is still recorded as the agent (a common state
+    // when the agent auto-submits before the user takes over). The right
+    // check is: is the actor one of this stage's configured reviewers /
+    // approvers? If yes, allow; if no, deny.
+    if (attemptedStageAdvance && !actorIsStageParticipant && !stageStateDrifted) {
       throw unprocessable("Only the active reviewer or approver can advance the current execution stage");
     }
 
