@@ -4,6 +4,10 @@ import {
   Field,
   InlineField,
 } from "../../components/agent-config-primitives";
+import {
+  LovonApiKeyField,
+} from "../../components/lovon-onboarding/LovonApiKeyField";
+import { getProviderMeta } from "../../components/lovon-onboarding/lovon-providers";
 
 const inputClass =
   "w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40";
@@ -53,6 +57,10 @@ export function LovonGroqFreeConfigFields({
     }
   };
 
+  // Resolve provider metadata from the central registry so the "Get key"
+  // link stays in sync if we change the URL in one place.
+  const groqMeta = getProviderMeta("lovon_groq_free");
+
   return (
     <>
       <Field
@@ -72,18 +80,26 @@ export function LovonGroqFreeConfigFields({
         </select>
       </Field>
 
-      <Field
-        label="Groq API key"
-        hint="Free API key from https://console.groq.com. Leave blank to fall back to the GROQ_API_KEY environment variable."
-      >
-        <DraftInput
+      {groqMeta ? (
+        <LovonApiKeyField
+          provider={groqMeta}
           value={apiKey}
           onCommit={(next) => setField("apiKey", next)}
-          placeholder="gsk_..."
-          type="password"
-          className={inputClass}
         />
-      </Field>
+      ) : (
+        <Field
+          label="Groq API key"
+          hint="Free API key from https://console.groq.com. Leave blank to fall back to GROQ_API_KEY."
+        >
+          <DraftInput
+            value={apiKey}
+            onCommit={(next) => setField("apiKey", next)}
+            placeholder="gsk_..."
+            type="password"
+            className={inputClass}
+          />
+        </Field>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <InlineField label="Temperature" hint="0.0 = deterministic, 1.0 = creative">

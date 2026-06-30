@@ -39,7 +39,10 @@ import {
   Code2,
   TrendingUp,
   MessageSquare,
+  ExternalLink,
 } from "lucide-react";
+import { LovonInstallCommand } from "@/components/lovon-onboarding/LovonInstallCommand";
+import { LOVON_FREE_PROVIDERS } from "@/components/lovon-onboarding/lovon-providers";
 
 /* -------------------------------------------------------------------------- */
 /*                              DESIGN TOKENS                                 */
@@ -122,16 +125,30 @@ const heroMini = [
   { icon: Shield, label: "Governance built-in" },
 ];
 
-const providers = [
-  { name: "Gemini Free", note: "Google AI Studio", tag: "Recommended" },
-  { name: "Groq Free", note: "Llama · Mixtral", tag: "Fastest" },
-  { name: "GitHub Models", note: "GPT-4o · Claude · Llama", tag: "Devs" },
-  { name: "Cloudflare AI", note: "Workers AI", tag: "Edge" },
-  { name: "Hugging Face", note: "Inference API", tag: "Open" },
-  { name: "Cohere Trial", note: "Command R+", tag: "RAG" },
-  { name: "Mistral Free", note: "La Plateforme", tag: "EU" },
-  { name: "OpenRouter", note: "Free models", tag: "Aggregator" },
-];
+const providers = LOVON_FREE_PROVIDERS.map((p) => ({
+  id: p.id,
+  name: p.label,
+  note: p.notes ?? "",
+  tag:
+    p.id === "lovon_groq_free"
+      ? "Fastest"
+      : p.id === "gemini_local"
+      ? "Recommended"
+      : p.id === "github_models"
+      ? "Devs"
+      : p.id === "cloudflare_ai"
+      ? "Edge"
+      : p.id === "huggingface"
+      ? "Open"
+      : p.id === "cohere_trial"
+      ? "RAG"
+      : p.id === "mistral_free"
+      ? "EU"
+      : p.id === "openrouter_free"
+      ? "Aggregator"
+      : "Free",
+  keyUrl: p.keyUrl,
+}));
 
 const features = [
   {
@@ -232,20 +249,6 @@ function Section({ children, className, id }: { children: React.ReactNode; class
     <section id={id} className={cn("relative px-6 py-24 lg:py-32", className)}>
       <div className="mx-auto max-w-6xl">{children}</div>
     </section>
-  );
-}
-
-function TerminalMock({ children, label = "~/lovon-teams" }: { children: React.ReactNode; label?: string }) {
-  return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-black/80 shadow-[0_30px_80px_-20px_rgba(0,224,255,0.4)] backdrop-blur">
-      <div className="flex items-center gap-1.5 border-b border-white/5 bg-white/[0.02] px-4 py-2.5">
-        <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-        <span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-        <span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-        <span className="ml-3 font-mono text-[11px] text-slate-500">{label}</span>
-      </div>
-      <pre className="overflow-x-auto p-5 font-mono text-[13px] leading-relaxed text-slate-200">{children}</pre>
-    </div>
   );
 }
 
@@ -755,13 +758,13 @@ export function LovonLanding() {
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <Eyebrow>Quickstart</Eyebrow>
-            <H2>From <code className="text-cyan-300">npx</code> to a running agent company in 60 seconds.</H2>
+            <H2>From <code className="text-cyan-300">copy</code> to a running agent company in 60 seconds.</H2>
             <p className="mt-5 text-slate-300">
-              Open source. Self-hosted. The interactive setup walks you through database
-              configuration, auth, and starting your first agent team — all on free-tier
-              providers, no API spend required.
+              Open source. Self-hosted. Pick your package manager, copy the install
+              command, and the interactive setup walks you through database, auth,
+              and starting your first agent team — all on free-tier providers.
             </p>
-            <div className="mt-6 flex gap-3">
+            <div className="mt-6 flex flex-wrap gap-3">
               <a
                 href="https://github.com/fjosmoreno/lovon-teams"
                 target="_blank"
@@ -779,18 +782,27 @@ export function LovonLanding() {
                 <BookOpen className="h-4 w-4" /> Read the docs →
               </a>
             </div>
+            <p className="mt-6 font-mono text-xs text-slate-500">
+              No account · No credit card · No paid tier required · MIT
+            </p>
           </div>
-          <TerminalMock label="~/lovon-teams">
-{`$ npx lovon-teams onboard --yes
-
-› Detected embedded PostgreSQL — bootstrapping…
+          <div className="space-y-3">
+            <LovonInstallCommand defaultManager="npm" variant="hero" />
+            <div className="overflow-hidden rounded-xl border border-white/5 bg-black/40 font-mono text-[11px] leading-relaxed text-slate-400">
+              <div className="flex items-center gap-1.5 border-b border-white/[0.04] bg-white/[0.02] px-3 py-1.5">
+                <span className="inline-block h-2 w-2 rounded-full bg-emerald-400/80" />
+                <span className="text-slate-500">expected output</span>
+              </div>
+              <pre className="overflow-x-auto p-3">
+{`› Embedded PostgreSQL ready
 › Created instance at ~/.lovon-teams/instances/default
-› Generated board claim URL
+› Board claim URL:   http://localhost:3100/board-claim/…
 › Picked 8 free providers, 0 paid
 
-✓ Lovon Teams is running at http://localhost:3100
-✓ Open the URL above to create your first admin.`}
-          </TerminalMock>
+✓ Lovon Teams running at http://localhost:3100`}
+              </pre>
+            </div>
+          </div>
         </div>
       </Section>
 
@@ -843,6 +855,15 @@ export function LovonLanding() {
                 <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">{p.tag}</span>
               </div>
               <p className="relative mt-1 text-xs text-slate-400">{p.note}</p>
+              <a
+                href={p.keyUrl}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="relative mt-3 inline-flex items-center gap-1 rounded-md border border-cyan-400/30 bg-cyan-400/5 px-2 py-0.5 font-mono text-[10px] text-cyan-300 transition hover:border-cyan-400/60 hover:bg-cyan-400/10"
+              >
+                <ExternalLink className="h-2.5 w-2.5" />
+                Get {p.name} key
+              </a>
             </div>
           ))}
         </div>
@@ -959,12 +980,8 @@ export function LovonLanding() {
           Deploy your AI workforce.{" "}
           <span className="bg-gradient-to-r from-cyan-300 to-emerald-300 bg-clip-text text-transparent">Free.</span>
         </H2>
-        <div className="mx-auto mt-10 max-w-2xl">
-          <TerminalMock>
-{`$ npx lovon-teams onboard --yes
-
-✓ Lovon Teams running at http://localhost:3100`}
-          </TerminalMock>
+        <div className="mx-auto mt-10 flex max-w-xl justify-center">
+          <LovonInstallCommand defaultManager="npm" variant="hero" />
         </div>
         <p className="mt-8 text-sm text-slate-400">Open source. Self-hosted. MIT licensed. No account required.</p>
         <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
