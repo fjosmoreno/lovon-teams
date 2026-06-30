@@ -1,15 +1,15 @@
 ---
-name: paperclip-page
+name: lovon-page
 description: >
-  Publish static HTML pages and asset folders to the Paperclip-approved S3 and
+  Publish static HTML pages and asset folders to the Lovon Teams-approved S3 and
   CloudFront website host. Use when asked to deploy, publish, host, or share a
-  persistent Paperclip page, wireframe viewer, prototype, report, or other static
+  persistent Lovon Teams page, wireframe viewer, prototype, report, or other static
   site without using here.now.
 ---
 
-# Paperclip Page
+# Lovon Teams Page
 
-Use this skill to publish a static directory to the configured Paperclip pages
+Use this skill to publish a static directory to the configured Lovon Teams pages
 host, for example `https://pages.paperclip.ing/<slug>/`.
 
 ## Requirements
@@ -20,7 +20,7 @@ host, for example `https://pages.paperclip.ing/<slug>/`.
   - `PAPERCLIP_PAGE_BUCKET`
   - `PAPERCLIP_PAGE_BASE_URL`
   - `AWS_REGION`
-  - AWS credentials via Paperclip Secrets or an approved AWS vault
+  - AWS credentials via Lovon Teams Secrets or an approved AWS vault
 - Optional environment variables:
   - `PAPERCLIP_PAGE_DEFAULT_PREFIX`
   - `PAPERCLIP_PAGE_AWS_PROFILE`
@@ -81,7 +81,7 @@ overwriting another page.
 - `Found symlink`: replace symlinks with real files before publishing.
 - `AccessDenied`: confirm the uploader IAM policy allows `ListBucket`,
   `GetObject`, and `PutObject` for the configured bucket/prefix, and that the
-  agent received the Paperclip Secrets.
+  agent received the Lovon Teams Secrets.
 - Public URL verification failed: check CloudFront deployment/DNS, object
   existence, and that the distribution uses HTTPS with the private S3 REST
   origin.

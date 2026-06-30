@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "packageName": "@paperclipai/skills-catalog",
   "packageVersion": "0.3.1",
-  "generatedAt": "2026-06-26T18:26:43.763Z",
+  "generatedAt": "2026-06-30T20:06:09.964Z",
   "skills": [
     {
       "id": "paperclipai:bundled:docs:doc-maintenance",
@@ -45,7 +45,7 @@
       "category": "paperclip-operations",
       "slug": "issue-triage",
       "name": "issue-triage",
-      "description": "Triage Paperclip inbox issues that are stale, blocked, in-review, or assigned-but-not-progressing, and decide a single next action per issue (resume, reassign, unblock, escalate, or close).",
+      "description": "Triage Lovon Teams inbox issues that are stale, blocked, in-review, or assigned-but-not-progressing, and decide a single next action per issue (resume, reassign, unblock, escalate, or close).",
       "path": "catalog/bundled/paperclip-operations/issue-triage",
       "entrypoint": "SKILL.md",
       "trustLevel": "markdown_only",
@@ -67,11 +67,11 @@
         {
           "path": "SKILL.md",
           "kind": "skill",
-          "sizeBytes": 4042,
-          "sha256": "df5bdc8bf5e017b7ba5f70a4b5323fad51d0c323278f386580f26cf43ad09160"
+          "sizeBytes": 4044,
+          "sha256": "ccc3d71c99b20da52754fa2e7d1649ebe2c3cfff231e9e0a279de97e1e243b67"
         }
       ],
-      "contentHash": "sha256:88dc13560371fb364963782cb4f6eeb4090fcde92ee3774479428ed6b90e11c1"
+      "contentHash": "sha256:895f521cc1d70d4cf5f9e913027bc5e4cc8f71e8afb49e741be7ed0921d8aef9"
     },
     {
       "id": "paperclipai:bundled:paperclip-operations:task-planning",
@@ -80,7 +80,7 @@
       "category": "paperclip-operations",
       "slug": "task-planning",
       "name": "task-planning",
-      "description": "Turn a Paperclip issue or request into a structured implementation plan with child task graph, blockers, owners, and acceptance criteria, then save it as the issue `plan` document.",
+      "description": "Turn a Lovon Teams issue or request into a structured implementation plan with child task graph, blockers, owners, and acceptance criteria, then save it as the issue `plan` document.",
       "path": "catalog/bundled/paperclip-operations/task-planning",
       "entrypoint": "SKILL.md",
       "trustLevel": "markdown_only",
@@ -102,11 +102,11 @@
         {
           "path": "SKILL.md",
           "kind": "skill",
-          "sizeBytes": 4938,
-          "sha256": "9c52a44a30ec8d306119da51bf298e9e3e6c382a9a9559ffd3054bf5e0c75f36"
+          "sizeBytes": 4946,
+          "sha256": "e19658e6f6b21cab5f00c6e6c88dd5b0e7dc8723fc878ec8121ffb6e2ee69091"
         }
       ],
-      "contentHash": "sha256:487c3116eead89fef4f71c984329c41836bd69951b7ef9ed8736c69435e02438"
+      "contentHash": "sha256:4f9bdbbc516dd928a9c8a679d6f77fc8c00e6809958a6730f7501978ad85cd08"
     },
     {
       "id": "paperclipai:bundled:product:paperclip-capsules",
@@ -114,11 +114,11 @@
       "kind": "bundled",
       "category": "product",
       "slug": "paperclip-capsules",
-      "name": "paperclip-capsules",
-      "description": "Generate, implement, or review Paperclip capsule visuals. Use when the user asks for Paperclip capsule art, capsule banks, agent capsule visuals, heartbeat status capsules, capsule identicons, capsule graphic-generator output, or validation of Paperclip capsule brand usage.",
+      "name": "lovon-capsules",
+      "description": "Generate, implement, or review Lovon Teams capsule visuals. Use when the user asks for Lovon Teams capsule art, capsule banks, agent capsule visuals, heartbeat status capsules, capsule identicons, capsule graphic-generator output, or validation of Lovon Teams capsule brand usage.",
       "path": "catalog/bundled/product/paperclip-capsules",
       "entrypoint": "SKILL.md",
-      "trustLevel": "markdown_only",
+      "trustLevel": "assets",
       "compatibility": "compatible",
       "defaultInstall": false,
       "recommendedForRoles": [
@@ -140,35 +140,41 @@
         {
           "path": "SKILL.md",
           "kind": "skill",
-          "sizeBytes": 5930,
-          "sha256": "eda40e8f29cae07c2ce8ad1cef3406eae243dbbf52069a85cfb56fe7999a25ff"
+          "sizeBytes": 5946,
+          "sha256": "a18e286164489b01ed9113938ae17892135ac0c1cfdd92fd7e4bc223f6eb0771"
+        },
+        {
+          "path": ".DS_Store",
+          "kind": "other",
+          "sizeBytes": 6148,
+          "sha256": "d65165279105ca6773180500688df4bdc69a2c7b771752f0a46ef120b7fd8ec3"
         },
         {
           "path": "references/generator-workflows.md",
           "kind": "reference",
-          "sizeBytes": 4356,
-          "sha256": "b5f72e5b6683e8f93f2d852e84c2cc19e6ab438b250bf777dfb2480dd4f6e1b6"
+          "sizeBytes": 4370,
+          "sha256": "f960c09b2f4b3f7e00c8d5f64de09443aa34fd4eb80b2e2d03409cbf1696aa6f"
         },
         {
           "path": "references/hero-capsule-bank.md",
           "kind": "reference",
-          "sizeBytes": 5981,
-          "sha256": "ec3d34113aa7bb527560d1eb4d8ab7667c73e18284c85a2019122743a767525a"
+          "sizeBytes": 5985,
+          "sha256": "9baed1c3cd76890f71c0530b75643d705f3826767abb5d4e9b1029e5a4907633"
         },
         {
           "path": "references/identicon-prototyper.md",
           "kind": "reference",
-          "sizeBytes": 6669,
-          "sha256": "0b19419efa1396a402097decabe24ea9ae649678569449c8ce855e0678df6bfe"
+          "sizeBytes": 6673,
+          "sha256": "b33b66261533053a336b71e1fff5accaf9bb6856f3106e0a9e94866b76062057"
         },
         {
           "path": "references/individual-status-capsules.md",
           "kind": "reference",
-          "sizeBytes": 5031,
-          "sha256": "be1f2eccf96b4d2deefe45b3bc1dd0a3597278472c2ffedadc43c57161e9103d"
+          "sizeBytes": 5033,
+          "sha256": "d73da1da828fc318036fda7b881ea4245ba398e1e70df6e8af7c097aefe05d94"
         }
       ],
-      "contentHash": "sha256:e8f502f9556103bd575bb664a9d21b1004869990802e639a188a720012116909"
+      "contentHash": "sha256:11ff31daa296eb95599803a83f77890adf2898ea18ccd8fd353c91c00f66c0b3"
     },
     {
       "id": "paperclipai:bundled:product:wireframe",

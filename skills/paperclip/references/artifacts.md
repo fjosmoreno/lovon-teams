@@ -2,7 +2,7 @@
 
 When work produces a user-inspectable file, upload true deliverables to the current issue before final disposition. Local filesystem paths are not enough because board users, reviewers, and cloud operators may not have access to the agent workspace.
 
-Use the helper bundled with this skill. From an installed `paperclip` skill directory, the helper lives at `scripts/paperclip-upload-artifact.sh`:
+Use the helper bundled with this skill. From an installed `lovon` skill directory, the helper lives at `scripts/paperclip-upload-artifact.sh`:
 
 ```bash
 scripts/paperclip-upload-artifact.sh path/to/output.webm \
@@ -60,7 +60,7 @@ curl -sS -X POST \
   --data-binary @workspace-file-work-product.json
 ```
 
-If the helper is unavailable, use the Paperclip API directly:
+If the helper is unavailable, use the Lovon Teams API directly:
 
 ```bash
 curl -sS -X POST \

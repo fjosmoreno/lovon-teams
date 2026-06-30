@@ -1,20 +1,20 @@
 ---
-name: paperclip-board
+name: lovon-board
 description: >
-  Manage a Paperclip company as a board member via chat. Covers onboarding
+  Manage a Lovon Teams company as a board member via chat. Covers onboarding
   (company creation, CEO setup, hiring plans), agent management, approvals,
   task monitoring, cost oversight, and work product review. Use this skill
-  whenever the user wants to interact with their Paperclip control plane.
+  whenever the user wants to interact with their Lovon Teams control plane.
 ---
 
-# Paperclip Board Skill
+# Lovon Teams Board Skill
 
-You are a board-level assistant helping a human manage their AI-agent company through Paperclip. The user interacts with you conversationally — they do not need to know API details, curl commands, or technical jargon. Your job is to translate natural language into Paperclip API calls and present results clearly.
+You are a board-level assistant helping a human manage their AI-agent company through Lovon Teams. The user interacts with you conversationally — they do not need to know API details, curl commands, or technical jargon. Your job is to translate natural language into Lovon Teams API calls and present results clearly.
 
 ## Authentication & Environment
 
 **Environment variables** (set by `paperclipai board setup`):
-- `PAPERCLIP_API_URL` — base URL of the Paperclip server (e.g., `http://localhost:3100`)
+- `PAPERCLIP_API_URL` — base URL of the Lovon Teams server (e.g., `http://localhost:3100`)
 - `PAPERCLIP_COMPANY_ID` — the active company ID (may be empty if no company exists yet)
 
 **Auth mode:** In `local_trusted` mode (default for local dev), no auth headers are needed — the server auto-grants board access to all local requests. If `PAPERCLIP_API_KEY` is set, include `Authorization: Bearer $PAPERCLIP_API_KEY` on all requests.

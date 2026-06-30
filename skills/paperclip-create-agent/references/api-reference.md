@@ -1,4 +1,4 @@
-# Paperclip Create Agent API Reference
+# Lovon Teams Create Agent API Reference
 
 ## Core Endpoints
 

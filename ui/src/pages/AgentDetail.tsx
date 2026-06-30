@@ -74,6 +74,7 @@ import {
   HelpCircle,
   FolderOpen,
   AlertTriangle,
+  Trash2,
 } from "lucide-react";
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -832,6 +833,19 @@ export function AgentDetail() {
       queryClient.invalidateQueries({ queryKey: queryKeys.agents.detail(agentLookupRef) });
       queryClient.invalidateQueries({ queryKey: queryKeys.agents.list(resolvedCompanyId) });
       queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(resolvedCompanyId) });
+    }
+  });
+
+  // Lovon Teams — hard delete the agent. There is no undo. We also force a
+  // navigation back to the company agents list so the user doesn't get
+  // stuck on a stale /agents/:id page.
+  const deleteAgentMutation = useMutation({
+    mutationFn: () => agentsApi.remove(agent?.id ?? routeAgentRef, resolvedCompanyId ?? undefined),
+    onSuccess: async () => {
+      if (!resolvedCompanyId) return;
+      await queryClient.invalidateQueries({ queryKey: queryKeys.agents.list(resolvedCompanyId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.dashboard(resolvedCompanyId) });
+      navigate(`/${resolvedCompanyId}/agents`);
     },
   });
 
@@ -1027,6 +1041,30 @@ export function AgentDetail() {
               <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">Live</span>
             </Link>
           )}
+          {/* Lovon Teams — hard delete the agent (no undo). */}
+          <button
+            type="button"
+            onClick={() => {
+              if (!agent) return;
+              const typed = window.prompt(
+                `This will permanently delete agent "${agent.name}" and ALL its runs, history, and config. Type the agent name to confirm:`,
+                "",
+              );
+              if (typed !== agent.name) {
+                if (typed !== null) {
+                  window.alert("Agent name did not match. Cancelled.");
+                }
+                return;
+              }
+              deleteAgentMutation.mutate();
+            }}
+            disabled={deleteAgentMutation.isPending}
+            className="cursor-pointer inline-flex h-8 items-center gap-1.5 rounded-md border border-red-500/40 bg-red-500/10 px-3 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:opacity-50"
+            title="Delete this agent permanently"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            {deleteAgentMutation.isPending ? "Deleting…" : "Delete"}
+          </button>
         </AgentActionButtons>
       </div>
 

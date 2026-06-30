@@ -145,6 +145,25 @@ export function CompanySettings() {
     }
   });
 
+  // Lovon Teams — permanent company delete (hard delete, no undo).
+  const deleteCompanyMutation = useMutation({
+    mutationFn: (companyId: string) => companiesApi.remove(companyId),
+    onSuccess: async () => {
+      // After a hard delete, fall back to the first remaining company
+      // (or none — the dashboard then redirects to the welcome landing).
+      const next = companies.find((c) => c.id !== selectedCompanyId && c.status !== "archived")?.id;
+      if (next) {
+        setSelectedCompanyId(next);
+      }
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.companies.all,
+      });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.companies.stats,
+      });
+    },
+  });
+
   useEffect(() => {
     setBreadcrumbs([
       { label: selectedCompany?.name ?? "Company", href: "/dashboard" },
@@ -447,6 +466,44 @@ export function CompanySettings() {
                 {archiveMutation.error instanceof Error
                   ? archiveMutation.error.message
                   : "Failed to archive company"}
+              </span>
+            )}
+          </div>
+        </div>
+        {/* Permanent delete — added by Lovon Teams */}
+        <div className="space-y-3 rounded-md border border-red-500/60 bg-red-500/5 px-4 py-4">
+          <p className="text-sm text-muted-foreground">
+            <strong className="text-red-400">Delete permanently</strong> — this
+            removes the company, all its agents, issues, runs, and config from
+            the database. There is no undo.
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={deleteCompanyMutation.isPending}
+              onClick={() => {
+                if (!selectedCompanyId) return;
+                const typed = window.prompt(
+                  `This will permanently delete "${selectedCompany.name}" and ALL its data. Type the company name to confirm:`,
+                  "",
+                );
+                if (typed !== selectedCompany.name) {
+                  if (typed !== null) {
+                    window.alert("Company name did not match. Cancelled.");
+                  }
+                  return;
+                }
+                deleteCompanyMutation.mutate(selectedCompanyId);
+              }}
+            >
+              {deleteCompanyMutation.isPending ? "Deleting..." : "Delete permanently"}
+            </Button>
+            {deleteCompanyMutation.isError && (
+              <span className="text-xs text-destructive">
+                {deleteCompanyMutation.error instanceof Error
+                  ? deleteCompanyMutation.error.message
+                  : "Failed to delete company"}
               </span>
             )}
           </div>

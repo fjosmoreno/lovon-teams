@@ -2,23 +2,23 @@
 name: create-issue-interaction-ui
 description: >
   Developer/maintainer skill for adding a new issue-thread interaction kind to
-  the Paperclip codebase end-to-end: shared contract, server service/routes,
+  the Lovon Teams codebase end-to-end: shared contract, server service/routes,
   UI card, fixtures/Storybook, CLI/MCP/plugin SDK helpers, agent guidance, and
-  tests. Use when a Paperclip contributor is asked to introduce a new
+  tests. Use when a Lovon Teams contributor is asked to introduce a new
   interaction family (something analogous to `request_confirmation`,
   `request_checkbox_confirmation`, `ask_user_questions`, or `suggest_tasks`)
   or to extend the issue-thread interaction system with a new card type. Do
-  NOT install this on production Paperclip agents — it is for repo work, not
+  NOT install this on production Lovon Teams agents — it is for repo work, not
   agent runtime behavior.
 ---
 
 # Create a new issue-thread interaction UI (developer skill)
 
-This skill walks a Paperclip contributor through introducing a new issue-thread
+This skill walks a Lovon Teams contributor through introducing a new issue-thread
 interaction kind from shared contract to issue-detail wiring, helpers, and
 docs. It is intentionally a developer/maintainer skill: the audience is a
 human or coding agent making code changes inside `paperclipai/paperclip`, not
-the operational agents that run inside a deployed Paperclip company.
+the operational agents that run inside a deployed Lovon Teams company.
 
 ## When to use
 
@@ -34,7 +34,7 @@ the operational agents that run inside a deployed Paperclip company.
 
 - Adding fields to an existing interaction kind that does not need a new
   payload schema. Patch the existing validators/UI in place instead.
-- Changing how Paperclip agents *call* interactions. Update `skills/paperclip`
+- Changing how Lovon Teams agents *call* interactions. Update `skills/paperclip`
   or `references/api-reference.md`; that is agent guidance, not card work.
 - Building a non-thread UI (issue detail sidebar, project board widget, etc.).
   Those have their own component conventions.
@@ -74,7 +74,7 @@ git show --stat 4d5322c82
 
 The plan it implemented is preserved as an issue document on
 [PAP-10415](/PAP/issues/PAP-10415#document-plan). Use it as the template for
-your own plan document if you are running this work through Paperclip itself.
+your own plan document if you are running this work through Lovon Teams itself.
 
 ## Order of operations
 

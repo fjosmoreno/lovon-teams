@@ -162,7 +162,15 @@ export function loadConfig(): Config {
     deploymentModeFromEnvRaw && DEPLOYMENT_MODES.includes(deploymentModeFromEnvRaw as DeploymentMode)
       ? (deploymentModeFromEnvRaw as DeploymentMode)
       : null;
-  const deploymentMode: DeploymentMode = deploymentModeFromEnv ?? fileConfig?.server.deploymentMode ?? "local_trusted";
+  // Lovon Teams override: `LOVON_DEV_AUTH=1` forces authenticated mode
+  // regardless of the dev-runner / config-file path. This is the canonical
+  // way to flip the banner from 'local_trusted' to 'authenticated' in
+  // local dev for our fork. The official PAPERCLIP_DEPLOYMENT_MODE env
+  // var still wins when set to a known value.
+  const lovonDevAuth = process.env.LOVON_DEV_AUTH === "1";
+  const deploymentMode: DeploymentMode = lovonDevAuth
+    ? "authenticated"
+    : (deploymentModeFromEnv ?? fileConfig?.server.deploymentMode ?? "local_trusted");
   const strictModeFromEnv = process.env.PAPERCLIP_SECRETS_STRICT_MODE;
   const secretsStrictMode =
     strictModeFromEnv !== undefined

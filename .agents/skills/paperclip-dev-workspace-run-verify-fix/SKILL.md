@@ -1,17 +1,17 @@
 ---
-name: paperclip-dev-workspace-run-verify-fix
+name: lovon-dev-workspace-run-verify-fix
 description: >
-  Run, verify, reseed, and repair a Paperclip isolated dev workspace service.
-  Use when asked to start or fix a Paperclip project/worktree service and prove
-  that it is managed by the Paperclip runtime, has the full bootstrapped cloned
+  Run, verify, reseed, and repair a Lovon Teams isolated dev workspace service.
+  Use when asked to start or fix a Lovon Teams project/worktree service and prove
+  that it is managed by the Lovon Teams runtime, has the full bootstrapped cloned
   database, is healthy, accepts normal dev credentials, exposes populated app
   data, and is visible as running from both the control-plane and the served
   workspace app.
 ---
 
-# Paperclip Dev Workspace Run / Verify / Fix
+# Lovon Teams Dev Workspace Run / Verify / Fix
 
-This skill is for Paperclip-specific development workspaces whose service is
+This skill is for Lovon Teams-specific development workspaces whose service is
 started through project execution workspace runtime services, typically a
 worktree service such as `paperclip-dev`.
 
@@ -35,9 +35,9 @@ passed.
 
 ## Hard rules
 
-- Read `doc/DEVELOPING.md` before running Paperclip CLI, dev server, worktree,
+- Read `doc/DEVELOPING.md` before running Lovon Teams CLI, dev server, worktree,
   database, build, or test commands.
-- Use the Paperclip CLI and API as the source of truth for worktree and
+- Use the Lovon Teams CLI and API as the source of truth for worktree and
   database operations. Do not use `psql`, raw embedded-Postgres commands, or
   ad hoc row copying for the normal fix path.
 - Do not manually copy only auth rows as the final fix. That proves login, but
@@ -160,7 +160,7 @@ Check the port owner when a process is already listening:
 lsof -nP -iTCP:"$SERVICE_PORT" -sTCP:LISTEN || true
 ```
 
-Use this only to identify and remove a stale matching Paperclip dev-runner
+Use this only to identify and remove a stale matching Lovon Teams dev-runner
 process after managed stop fails. Do not kill unrelated processes.
 
 ## Verify main control-plane runtime state
@@ -187,7 +187,7 @@ stale process through the managed runtime.
 
 ## Verify served workspace runtime state
 
-The cloned Paperclip app must also know about the service. Query the same
+The cloned Lovon Teams app must also know about the service. Query the same
 execution workspace through the served app when agent auth is available there:
 
 ```sh
@@ -278,7 +278,7 @@ Likely cause: stale Node/web process remained alive after embedded Postgres
 died.
 
 Fix: managed stop first. If the process survives, identify the matching
-Paperclip dev-runner process group for the target port and terminate only that
+Lovon Teams dev-runner process group for the target port and terminate only that
 group. Then managed start.
 
 Verify: `/api/health` is ok after a stability wait and the runtime record is
@@ -321,7 +321,7 @@ Likely causes: the cloned issue/run/agent state does not match the current
 heartbeat, or the run id is absent in the cloned database after reseed.
 
 Fix: prefer the main control-plane managed runtime path and full reseed. If
-the cloned app state itself must be repaired, use normal Paperclip issue/run
+the cloned app state itself must be repaired, use normal Lovon Teams issue/run
 transitions first. Do not hide the condition with raw DB edits; report the
 exact guard or missing row if it blocks the normal path.
 

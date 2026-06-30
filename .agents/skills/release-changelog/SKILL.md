@@ -1,17 +1,17 @@
 ---
 name: release-changelog
 description: >
-  Generate the stable Paperclip release changelog at releases/vYYYY.MDD.P.md by
+  Generate the stable Lovon Teams release changelog at releases/vYYYY.MDD.P.md by
   reading commits, changesets, and merged PR context since the last stable tag.
 ---
 
 # Release Changelog Skill
 
-Generate the user-facing changelog for the **stable** Paperclip release.
+Generate the user-facing changelog for the **stable** Lovon Teams release.
 
 ## Versioning Model
 
-Paperclip uses **calendar versioning (calver)**:
+Lovon Teams uses **calendar versioning (calver)**:
 
 - Stable releases: `YYYY.MDD.P` (e.g. `2026.318.0`)
 - Canary releases: `YYYY.MDD.P-canary.N` (e.g. `2026.318.1-canary.0`)
@@ -141,14 +141,14 @@ Rules:
 
 ## Step 5 — Write the File
 
-The opening line of the changelog must be an H1 of the format `# Paperclip {version}`
-(no braces), e.g. `# Paperclip v2026.618.0`. Always include the `Paperclip ` prefix and
+The opening line of the changelog must be an H1 of the format `# Lovon Teams {version}`
+(no braces), e.g. `# Lovon Teams v2026.618.0`. Always include the `Lovon Teams ` prefix and
 the `v` on the version.
 
 Template:
 
 ```markdown
-# Paperclip vYYYY.MDD.P
+# Lovon Teams vYYYY.MDD.P
 
 > Released: YYYY-MM-DD
 
@@ -182,7 +182,7 @@ real name or email). To find GitHub usernames:
 **Never expose contributor email addresses.** Use `@username` only.
 
 Exclude bot accounts (e.g. `lockfile-bot`, `dependabot`) from the list.
-Exclude Paperclip founders from the list (e.g. `cryppadotta`, `forgottendev`, `devinfoley`, `sockmonster`, `scotttong`)
+Exclude Lovon Teams founders from the list (e.g. `cryppadotta`, `forgottendev`, `devinfoley`, `sockmonster`, `scotttong`)
 
 List contributors in alphabetical order by GitHub username (case-insensitive).
 
@@ -192,7 +192,7 @@ If there are no contributors left after exclusions, then just skip this section 
 
 Before handing it off:
 
-1. confirm the H1 heading is `# Paperclip {version}` (e.g. `# Paperclip v2026.618.0`) with the stable version only
+1. confirm the H1 heading is `# Lovon Teams {version}` (e.g. `# Lovon Teams v2026.618.0`) with the stable version only
 2. confirm there is no `-canary` language in the title or filename
 3. confirm any breaking changes have an upgrade path
 4. present the draft for human sign-off
