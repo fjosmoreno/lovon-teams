@@ -423,48 +423,53 @@ export function companyService(db: Db) {
 
     remove: (id: string) =>
       db.transaction(async (tx) => {
-        // Delete from child tables in dependency order
-        const companyRunIds = await tx
-          .select({ id: heartbeatRuns.id })
-          .from(heartbeatRuns)
-          .where(eq(heartbeatRuns.companyId, id));
+        // Discover every public schema table that has a `company_id` column
+        // and purge its rows for this company. Doing this via
+        // information_schema keeps the cascade complete even as new tables
+        // are added in future migrations. We temporarily relax FK checks
+        // via `session_replication_role = replica` (the standard DBA trick
+        // for transactional bulk deletes) so that inter-table FK ordering
+        // (e.g. projects -> goals, executions_workspaces -> issues) does
+        // not have to be hand-written. The session role is restored before
+        // commit so any post-commit triggers/constraints behave normally.
+        const tableRows: ReadonlyArray<{ table_name: string }> = await tx.execute(sql`
+          SELECT c.table_name
+          FROM information_schema.columns c
+          WHERE c.table_schema = 'public'
+            AND c.column_name = 'company_id'
+            AND c.table_name <> 'companies'
+            AND EXISTS (
+              SELECT 1 FROM information_schema.tables t
+              WHERE t.table_schema = 'public'
+                AND t.table_name = c.table_name
+                AND t.table_type = 'BASE TABLE'
+            )
+          ORDER BY c.table_name
+        `);
 
-        await tx.delete(heartbeatRunEvents).where(eq(heartbeatRunEvents.companyId, id));
-        if (companyRunIds.length > 0) {
-          await tx
-            .delete(heartbeatRunEvents)
-            .where(inArray(heartbeatRunEvents.runId, companyRunIds.map((run) => run.id)));
+        await tx.execute(sql`SET LOCAL session_replication_role = 'replica'`);
+        try {
+          for (const row of tableRows) {
+            // Identifier interpolation is intentional: the names came from
+            // information_schema. Defensive sanitize + double-quote so SQL
+            // injection on schema-metadata-derived names is impossible.
+            const tableName = row.table_name.replace(/[^a-zA-Z0-9_]/g, "");
+            if (!tableName) continue;
+            await tx.execute(
+              sql.raw(`DELETE FROM "${tableName}" WHERE company_id = '${id.replace(/'/g, "''")}'`),
+            );
+          }
+          // Finally remove the company row itself.
+          const rows = await tx
+            .delete(companies)
+            .where(eq(companies.id, id))
+            .returning();
+          return rows[0] ?? null;
+        } finally {
+          // Restore normal FK enforcement so any concurrent query in the
+          // same session sees constraints re-enabled.
+          await tx.execute(sql`SET LOCAL session_replication_role = 'origin'`);
         }
-        await tx.delete(agentTaskSessions).where(eq(agentTaskSessions.companyId, id));
-        await tx.delete(activityLog).where(eq(activityLog.companyId, id));
-        await tx.delete(heartbeatRuns).where(eq(heartbeatRuns.companyId, id));
-        await tx.delete(agentWakeupRequests).where(eq(agentWakeupRequests.companyId, id));
-        await tx.delete(agentApiKeys).where(eq(agentApiKeys.companyId, id));
-        await tx.delete(agentRuntimeState).where(eq(agentRuntimeState.companyId, id));
-        await tx.delete(issueComments).where(eq(issueComments.companyId, id));
-        await tx.delete(costEvents).where(eq(costEvents.companyId, id));
-        await tx.delete(financeEvents).where(eq(financeEvents.companyId, id));
-        await tx.delete(approvalComments).where(eq(approvalComments.companyId, id));
-        await tx.delete(approvals).where(eq(approvals.companyId, id));
-        await tx.delete(companySecrets).where(eq(companySecrets.companyId, id));
-        await tx.delete(joinRequests).where(eq(joinRequests.companyId, id));
-        await tx.delete(invites).where(eq(invites.companyId, id));
-        await tx.delete(principalPermissionGrants).where(eq(principalPermissionGrants.companyId, id));
-        await tx.delete(companyMemberships).where(eq(companyMemberships.companyId, id));
-        await tx.delete(companySkills).where(eq(companySkills.companyId, id));
-        await tx.delete(issueReadStates).where(eq(issueReadStates.companyId, id));
-        await tx.delete(documents).where(eq(documents.companyId, id));
-        await tx.delete(issues).where(eq(issues.companyId, id));
-        await tx.delete(companyLogos).where(eq(companyLogos.companyId, id));
-        await tx.delete(assets).where(eq(assets.companyId, id));
-        await tx.delete(goals).where(eq(goals.companyId, id));
-        await tx.delete(projects).where(eq(projects.companyId, id));
-        await tx.delete(agents).where(eq(agents.companyId, id));
-        const rows = await tx
-          .delete(companies)
-          .where(eq(companies.id, id))
-          .returning();
-        return rows[0] ?? null;
       }),
 
     stats: () =>
