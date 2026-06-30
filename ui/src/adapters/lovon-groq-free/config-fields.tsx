@@ -42,12 +42,12 @@ export function LovonGroqFreeConfigFields({
     : eff<string>("adapterConfig", "apiKey", "");
 
   const temperature = isCreate
-    ? (typeof v.temperature === "number" ? v.temperature : 0.7)
-    : eff<number>("adapterConfig", "temperature", 0.7);
+    ? (typeof v.temperature === "number" ? v.temperature : 0.5)
+    : eff<number>("adapterConfig", "temperature", 0.5);
 
   const maxTokens = isCreate
-    ? (typeof v.max_tokens === "number" ? v.max_tokens : 4096)
-    : eff<number>("adapterConfig", "max_tokens", 4096);
+    ? (typeof v.max_tokens === "number" ? v.max_tokens : 1536)
+    : eff<number>("adapterConfig", "max_tokens", 1536);
 
   const setField = (key: string, value: unknown) => {
     if (isCreate && set && values) {
